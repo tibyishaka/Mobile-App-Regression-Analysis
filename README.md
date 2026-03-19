@@ -1,247 +1,220 @@
-# Mobile App Regression Analysis
+# Mobile App Regression Analysis & Salary Prediction System
 
-## 🎯 Mission
-To strengthen cybersecurity awareness and digital literacy through accessible, data-driven education by building intelligent tools and APIs that help learners understand risk patterns and make safer digital decisions.
+## 🎯 Project Overview
 
-## 📋 Project Overview
+This project is a comprehensive machine learning system that combines a data science pipeline with a production-ready REST API and a mobile application frontend. The system trains regression models to predict employee salaries based on demographic and professional features, exposes these predictions via a FastAPI service, and consumes them in a mobile interface.
 
-**Mobile App Regression Analysis** is a full-stack machine learning project that combines Jupyter-based model development with a production-ready REST API for salary prediction. The system trains multiple regression models on demographic and job feature data, compares their performance, and exposes the best model through a scalable FastAPI service.
+### Key Components
 
-### Key Components:
-- **Model Training**: Jupyter notebook implementing salary prediction pipeline
-- **REST API**: Production-ready FastAPI service for predictions
-- **Deployment**: Docker & Render.com support for cloud deployment
-- **Model Management**: Dynamic model retraining via API
-- **Batch Processing**: Support for single and batch predictions (up to 100 items)
-
----
-
-## 🏗️ Project Architecture
-
-```
-Mobile-App-Regression-Analysis/
-├── API/                                    # FastAPI REST API (main application)
-│   ├── main.py                             # FastAPI app with endpoints
-│   ├── schemas.py                          # Pydantic models for validation
-│   ├── model_utils.py                      # Model loading & prediction logic
-│   ├── model_retraining.py                 # Model retraining functionality
-│   ├── config.py                           # Configuration settings
-│   ├── requirements.txt                    # Python dependencies
-│   ├── test_api.py                         # API test suite
-│   ├── README.md                           # API-specific documentation
-│   ├── QUICKSTART.md                       # 5-minute setup guide
-│   ├── ARCHITECTURE.md                     # System architecture details
-│   └── __init__.py                         # Package initialization
-│
-├── Linear_Regression/                      # Model training artifacts
-│   ├── LinearRegression.ipynb              # Model training notebook
-│   └── best_model_salary.pkl               # Trained model artifact
-│
-├── API_SUMMARY.md                          # Comprehensive API overview
-├── GETTING_STARTED.md                      # Implementation guide
-├── Dockerfile                              # Docker container specification
-├── docker-compose.yml                      # Local Docker development
-├── Procfile                                # Render deployment configuration
-└── README.md                               # This file
-```
+*   **Machine Learning Pipeline**: Jupyter notebook workflow for data analysis, preprocessing, and training multiple regression models (Linear Regression, Decision Tree, Random Forest).
+*   **REST API**: A robust FastAPI backend that serves the best-performing model, handling single and batch predictions with strict data validation.
+*   **Mobile Application**: A Flutter-based mobile app (located in `prediction_app/`) that allows users to interact with the prediction model on the go.
 
 ---
 
 ## ✨ Features
 
-### 1. **REST API Endpoints**
+### ✅ API & Backend (FastAPI)
+*   **Optimized Model Serving**: Automatically loads the best-trained model (`best_model_salary.pkl`).
+*   **Multiple Endpoints**:
+    *   `/predict`: Single salary prediction with real-time inference.
+    *   `/predict/batch`: High-performance batch processing for up to 100 records.
+    *   `/health`: System status monitoring.
+    *   `/model/info`: Metadata about the currently active model.
+*   **Robust Validation**: Pydantic models ensure data integrity (e.g., Age 18-80, valid Education levels).
+*   **Production Ready**: Includes CORS middleware, structured logging, and Docker containerization.
+*   **Interactive Docs**: Automatic Swagger UI (`/docs`) and ReDoc (`/redoc`).
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/` | GET | Welcome message & API status |
-| `/health` | GET | Health check endpoint |
-| `/model/info` | GET | Model metadata (name, R² score, training info) |
-| `/predict` | POST | Single salary prediction |
-| `/predict/batch` | POST | Batch predictions (1-100 samples) |
-
-### 2. **Machine Learning Models**
-
-The notebook trains and compares three regression models:
-- **Linear Regression** (SGD-based)
-- **Decision Tree Regressor**
-- **Random Forest Regressor**
-
-Best-performing model is automatically selected and deployed.
-
-### 3. **Data Validation & Constraints**
-
-All API inputs validated with Pydantic:
-- **Age**: 18-80 years
-- **Years of Experience**: 0-60 years
-- **Gender**: 'Male' or 'Female'
-- **Education Level**: 'High School', 'Bachelor\'s', 'Master\'s', or 'PhD'
-- **Job Title**: 1-100 characters
-
-### 4. **Production Features**
-
-- ✅ **CORS Middleware**: Enabled for cross-origin requests
-- ✅ **Interactive Documentation**: Swagger UI at `/docs`, ReDoc at `/redoc`
-- ✅ **Error Handling**: Comprehensive validation and error responses
-- ✅ **Logging**: Structured logging for debugging and monitoring
-- ✅ **Batch Processing**: Process multiple predictions efficiently
+### ✅ Machine Learning
+*   **Model Comparison**: Trains and compares Linear Regression (SGD), Decision Tree, and Random Forest.
+*   **Pipeline**: Includes EDA (Exploratory Data Analysis), feature engineering, and model persistence.
 
 ---
 
-## 🚀 Quick Start
+## 🛠️ Tech Stack
 
-### Local Development (5 minutes)
+**Backend & ML**:
+*   **Language**: Python 3.8+
+*   **Framework**: FastAPI, Uvicorn
+*   **Machine Learning**: Scikit-Learn, Pandas, NumPy
+*   **Serialization**: Pickle
+*   **Environment**: Virtualenv / Docker
 
-#### Step 1: Navigate to API Directory
+**Frontend (Mobile)**:
+*   **Framework**: Flutter
+*   **Language**: Dart
+*   **Platforms**: Android, iOS
+
+**Tools & DevOps**:
+*   **Containerization**: Docker, Docker Compose
+*   **Notebooks**: Jupyter
+
+---
+
+## 📁 Project Structure
+
+```
+Mobile-App-Regression-Analysis/
+├── API/                          # FastAPI Backend Application
+│   ├── main.py                   # Application entry point
+│   ├── schemas.py                # Data validation models
+│   ├── model_utils.py            # Model loading & inference logic
+│   ├── config.py                 # App configuration
+│   └── ...
+├── Linear_Regression/            # DS/ML Environment
+│   ├── LinearRegression.ipynb    # Training notebook
+│   └── best_model_salary.pkl     # Serialized model artifact
+├── prediction_app/               # Mobile Application (Flutter)
+│   ├── lib/                      # Dart source code
+│   ├── pubspec.yaml              # App dependencies
+│   └── ...
+├── Dockerfile                    # Container definition
+├── docker-compose.yml            # Multi-container orchestration
+├── requirements.txt              # Python dependencies
+└── README.md                     # Project documentation
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+*   Python 3.8+
+*   Docker (Optional, for containerized run)
+*   Flutter SDK (For mobile app development)
+
+### Option 1: Local Python Setup
+
+1.  **Navigate to the API directory**:
+    ```bash
+    cd API
+    ```
+
+2.  **Create and activate a virtual environment**:
+    ```bash
+    # Windows
+    python -m venv venv
+    venv\Scripts\activate
+
+    # macOS/Linux
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+
+3.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Run the API**:
+    ```bash
+    uvicorn main:app --reload
+    ```
+    The API will be accessible at `http://localhost:8000`.
+
+### Option 2: Docker Setup
+
+Run the entire backend stack using Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+Access the API documentation at `http://localhost:8000/docs`.
+
+---
+
+## 📱 Mobile Application Setup
+
+To run the Flutter application that consumes the API:
+
+1.  **Ensure the API is running** (locally or on a server).
+2.  **Navigate to the app directory**:
+    ```bash
+    cd prediction_app
+    ```
+3.  **Install dependencies**:
+    ```bash
+    flutter pub get
+    ```
+4.  **Run the app**:
+    ```bash
+    flutter run
+    ```
+    *Note: If running on an emulator, ensure the API URL in the app is set to `10.0.2.2:8000` (for Android) or `localhost:8000` (for iOS).*
+
+---
+
+## 📊 Dataset & Model Insights
+
+### Dataset
+The model is trained on the **Salary Data** dataset (sourced from Kaggle), which contains information about employees' demographic and professional details.
+
+**Key Features:**
+*   **Age**: Employee age in years.
+*   **Gender**: Male or Female.
+*   **Education Level**: High School, Bachelor's, Master's, PhD.
+*   **Job Title**: Professional designation (e.g., "Software Engineer", "Data Scientist").
+*   **Years of Experience**: Number of years in the workforce.
+*   **Target**: Salary (Continuous variable).
+
+### Model Training
+The `LinearRegression.ipynb` notebook performs the following:
+1.  **Data Cleaning**: Handling missing values and encoding categorical variables.
+2.  **Training**: Three models are trained and evaluated:
+    *   **Linear Regression (SGD)**: Good baseline for linear relationships.
+    *   **Decision Tree**: Captures non-linear patterns.
+    *   **Random Forest**: Ensemble method that generally provides the highest accuracy.
+3.  **Selection**: The model with the best R² score is automatically saved as `best_model_salary.pkl`.
+
+---
+
+## 🧪 Usage & Testing
+
+### API Endpoints
+
+| Method | Endpoint         | Description                          |
+| ------ | ---------------- | ------------------------------------ |
+| `GET`  | `/`              | API Welcome & Status                 |
+| `GET`  | `/health`        | Health check                         |
+| `GET`  | `/model/info`    | Details about the loaded model       |
+| `POST` | `/predict`       | Predict salary for a single user     |
+| `POST` | `/predict/batch` | Predict salaries for a batch of users|
+
+#### Sample Prediction Request
+**POST** `/predict`
+```json
+{
+  "age": 32,
+  "gender": "Male",
+  "education_level": "Master's",
+  "job_title": "Data Analyst",
+  "years_of_experience": 7
+}
+```
+
+### Running Tests
+Run the automated test suite to ensure everything is working correctly:
+
 ```bash
 cd API
+python test_api.py
 ```
-
-#### Step 2: Create Virtual Environment
-```bash
-python -m venv venv
-```
-
-#### Step 3: Activate Virtual Environment
-```bash
-# Windows
-venv\Scripts\activate
-
-# macOS/Linux
-source venv/bin/activate
-```
-
-#### Step 4: Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-#### Step 5: Run API Server
-```bash
-uvicorn main:app --reload
-```
-
-#### Step 6: Access the API
-- **Main URL**: http://localhost:8000
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health Check**: http://localhost:8000/health
-
-### Test Single Prediction
-```bash
-curl -X POST "http://localhost:8000/predict" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "age": 32,
-    "gender": "Male",
-    "education_level": "Master'\''s",
-    "job_title": "Data Analyst",
-    "years_of_experience": 7
-  }'
-```
-
----
-
-## 🐳 Docker Deployment
-
-### Using Docker Compose (Recommended)
-```bash
-docker-compose up
-```
-Access API at: http://localhost:8000/docs
-
-### Manual Docker Build
-```bash
-docker build -t salary-api .
-docker run -p 8000:8000 salary-api
-```
-
----
-
-## 📊 Model Training Workflow
-
-### Running the Notebook
-
-1. **Ensure best model exists**: Run [Linear_Regression/LinearRegression.ipynb](Linear_Regression/LinearRegression.ipynb) to train models
-2. **Output**: Generates `best_model_salary.pkl` in the notebook directory
-3. **API Usage**: API automatically loads and uses the saved model
-
----
-
-## 📦 Dependencies
-
-**Core Framework**:
-- `fastapi==0.104.1` - Modern web framework
-- `uvicorn==0.24.0` - ASGI server
-
-**Data & ML**:
-- `pandas==2.1.3` - Data manipulation
-- `numpy==1.26.2` - Numerical computing
-- `scikit-learn==1.3.2` - Machine learning
-
-**Validation & Config**:
-- `pydantic==2.5.0` - Data validation
-- `python-multipart==0.0.6` - File uploads
-- `python-dotenv==1.0.0` - Environment variables
-
-See [API/requirements.txt](API/requirements.txt) for complete list.
-
----
-
-## 📚 Documentation
-
-- **[API_SUMMARY.md](API_SUMMARY.md)**: Complete API feature overview
-- **[API/README.md](API/README.md)**: API-specific documentation
-- **[API/QUICKSTART.md](API/QUICKSTART.md)**: Quick setup guide
-- **[API/ARCHITECTURE.md](API/ARCHITECTURE.md)**: System architecture & design
-- **[GETTING_STARTED.md](GETTING_STARTED.md)**: Implementation details
-- **[RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)**: Cloud deployment guide
-
----
-
-## 🚢 Deployment
-
-### Render.com (Production)
-Follow instructions in [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for automated deployment.
-
-### Local Docker
-```bash
-docker-compose up
-```
-
-### Manual Uvicorn
-```bash
-cd API
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
----
-
-## 🔧 Configuration
-
-Environment variables (see `.env.example` in API folder):
-```
-KAGGLE_USERNAME=your_username
-KAGGLE_KEY=your_api_key
-MODEL_PATH=./Linear_Regression/best_model_salary.pkl
-```
-
----
-
-## 📝 Notes
-
-- **Dataset**: Downloaded from Kaggle using `kagglehub` (internet access required for first-time download)
-- **Model Artifacts**: Training notebook generates `best_model_salary.pkl` 
-- **CORS**: Enabled for all origins (configure in `config.py` for production)
-- **Logging**: Structured logs with timestamps and severity levels
 
 ---
 
 ## 🤝 Contributing
 
-This project is maintained as part of ALU coursework and educational initiatives. Updates reflect current implementation state.
+Contributions are welcome! Please follow these steps:
+1.  Fork the repository.
+2.  Create a new feature branch (`git checkout -b feature/AmazingFeature`).
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  Push to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a Pull Request.
 
 ---
 
-## 📄 License
+## 📜 License
 
-Educational project for ALU (African Leadership University)
+This project is open-source and available under the [MIT License](LICENSE).
