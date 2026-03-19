@@ -74,5 +74,4 @@ pip install -r requirements.txt --no-cache-dir
 ## Next Steps
 
 - Read [README.md](README.md) for full API documentation
-- Read [RENDER_DEPLOYMENT.md](../RENDER_DEPLOYMENT.md) to deploy to production
 - Check out the endpoints in Swagger UI for interactive testing
