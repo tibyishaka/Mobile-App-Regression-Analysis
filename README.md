@@ -1,8 +1,12 @@
 # Mobile App Regression Analysis & Salary Prediction System
 
-## 🎯 Project Overview
+## 🎯 Mission
 
-This project is a comprehensive machine learning system that combines a machien learning pipeline with a  REST API and a mobile application frontend. The system trains regression models to predict employee salaries based on demographic and professional features, exposes these predictions via a FastAPI service, and consumes them in a mobile interface.
+To strengthen cybersecurity awareness and digital literacy through accessible, data-driven education by building intelligent tools and APIs that help learners understand risk patterns and make safer digital decisions.
+
+## 📋 Project Overview
+
+This project is a comprehensive machine learning system that combines a machine learning pipeline with a  REST API and a mobile application frontend. The system trains regression models to predict employee salaries based on demographic and professional features, exposes these predictions via a FastAPI service, and consumes them in a mobile interface.
 
 ### Key Components
 
@@ -142,7 +146,6 @@ To run the Flutter application that consumes the API:
     ```bash
     flutter run
     ```
-    *Note: If running on an emulator, ensure the API URL in the app is set to `10.0.2.2:8000` (for Android) or `localhost:8000` (for iOS).*
 
 ---
 
