@@ -2,7 +2,7 @@
 
 ## 🎯 Project Overview
 
-This project is a comprehensive machine learning system that combines a data science pipeline with a production-ready REST API and a mobile application frontend. The system trains regression models to predict employee salaries based on demographic and professional features, exposes these predictions via a FastAPI service, and consumes them in a mobile interface.
+This project is a comprehensive machine learning system that combines a machien learning pipeline with a  REST API and a mobile application frontend. The system trains regression models to predict employee salaries based on demographic and professional features, exposes these predictions via a FastAPI service, and consumes them in a mobile interface.
 
 ### Key Components
 
