@@ -39,7 +39,6 @@ Mobile-App-Regression-Analysis/
 │
 ├── API_SUMMARY.md                          # Comprehensive API overview
 ├── GETTING_STARTED.md                      # Implementation guide
-├── RENDER_DEPLOYMENT.md                    # Cloud deployment instructions
 ├── Dockerfile                              # Docker container specification
 ├── docker-compose.yml                      # Local Docker development
 ├── Procfile                                # Render deployment configuration
