@@ -1,11 +1,17 @@
 import pickle
 import pandas as pd
 import numpy as np
+import sklearn
 from pathlib import Path
 from typing import Union, Dict, Any, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Log library versions
+logger.info(f"scikit-learn version: {sklearn.__version__}")
+logger.info(f"pandas version: {pd.__version__}")
+logger.info(f"numpy version: {np.__version__}")
 
 # Path to the best model artifact
 MODEL_PATH = Path(__file__).parent.parent / "Linear_Regression" / "best_model_salary.pkl"
