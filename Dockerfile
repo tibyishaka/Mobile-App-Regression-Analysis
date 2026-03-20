@@ -3,7 +3,7 @@ FROM python:3.11-slim as builder
 
 WORKDIR /tmp
 COPY API/requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt && pip list
+RUN pip install --user --no-cache-dir -r requirements.txt
 
 # Final stage
 FROM python:3.11-slim

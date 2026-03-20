@@ -9,9 +9,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Log library versions
-logger.info(f"scikit-learn version: {sklearn.__version__}")
-logger.info(f"pandas version: {pd.__version__}")
-logger.info(f"numpy version: {np.__version__}")
+# logger.info(f"scikit-learn version: {sklearn.__version__}")
+# logger.info(f"pandas version: {pd.__version__}")
+# logger.info(f"numpy version: {np.__version__}")
 
 # Path to the best model artifact
 MODEL_PATH = Path(__file__).parent.parent / "Linear_Regression" / "best_model_salary.pkl"
