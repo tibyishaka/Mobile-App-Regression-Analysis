@@ -1,8 +1,22 @@
 # Mobile App Regression Analysis & Salary Prediction System
 
 ## 🎯 Mission
+To strengthen cybersecurity awareness and digital literacy through accessible, data-driven education by building intelligent tools  that help learners understand risk patterns and make safer digital decisions.
 
-To strengthen cybersecurity awareness and digital literacy through accessible, data-driven education by building intelligent tools and APIs that help learners understand risk patterns and make safer digital decisions.
+## Problem Statement
+The problem addressed is the lack of accessible, real-time salary insights for professionals navigating career decisions in a complex job market.
+Our solution offers a seamless mobile experience powered by a robust regression model to bridge this information gap.
+
+## 📺 Demo Video
+
+[LINK TO YOUTUBE VIDEO DEMO](..)
+
+## 🌐 Public API Endpoint
+
+The API is deployed and publicly accessible. You can test the endpoints directly via the Swagger UI:
+*   **Base URL**: `https://salary-api-o99n.onrender.com`
+*   **Interactive Documentation (Swagger UI)**: [https://salary-api-o99n.onrender.com/docs](https://salary-api-o99n.onrender.com/docs)
+*   **Tests Assessment**: Please use the Swagger UI link above to assess the tests.
 
 ## 📋 Project Overview
 
@@ -133,18 +147,31 @@ Access the API documentation at `http://localhost:8000/docs`.
 
 To run the Flutter application that consumes the API:
 
-1.  **Ensure the API is running** (locally or on a server).
-2.  **Navigate to the app directory**:
+### Prerequisites
+*   Flutter SDK installed and added to PATH.
+*   Android Studio / Xcode installed.
+*   An Android Emulator or iOS Simulator running.
+
+### Installation & Execution
+
+1.  **Navigate to the app directory**:
     ```bash
     cd prediction_app
     ```
-3.  **Install dependencies**:
+
+2.  **Install dependencies**:
     ```bash
     flutter pub get
     ```
-4.  **Run the app**:
+
+3.  **Run the app**:
+    Ensure your device/emulator is connected.
     ```bash
     flutter run
+    ```
+    To run specifically on Chrome (web):
+    ```bash
+    flutter run -d chrome
     ```
 
 ---
@@ -217,7 +244,8 @@ Contributions are welcome! Please follow these steps:
 5.  Open a Pull Request.
 
 ---
+## About Project
 
-## 📜 License
+This project is a comprehensive machine learning system that combines a machine learning pipeline with a REST API and a mobile application frontend. The system trains regression models to predict employee salaries based on demographic and professional features, exposes these predictions via a FastAPI service, and consumes them in a mobile interface. 
 
-This project is open-source and available under the [MIT License](LICENSE).
+This was done as part of Summative assignment at African Leadership university
