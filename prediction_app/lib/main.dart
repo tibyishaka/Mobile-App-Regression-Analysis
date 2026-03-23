@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'batch_prediction_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,12 +33,12 @@ class SalaryPredictionScreen extends StatefulWidget {
 
 class _SalaryPredictionScreenState extends State<SalaryPredictionScreen> {
   final TextEditingController ageController = TextEditingController();
-  final TextEditingController genderController = TextEditingController();
-  final TextEditingController educationLevelController =
-      TextEditingController();
   final TextEditingController jobTitleController = TextEditingController();
   final TextEditingController yearsOfExperienceController =
       TextEditingController();
+
+  String? selectedGender;
+  String? selectedEducation;
 
   String? resultMessage;
   bool isError = false;
@@ -52,36 +55,9 @@ class _SalaryPredictionScreenState extends State<SalaryPredictionScreen> {
   @override
   void dispose() {
     ageController.dispose();
-    genderController.dispose();
-    educationLevelController.dispose();
     jobTitleController.dispose();
     yearsOfExperienceController.dispose();
     super.dispose();
-  }
-
-  String normalizeEducationLevel(String input) {
-    String normalized = input.trim().toLowerCase();
-
-    if (normalized == 'high school' || normalized == 'highschool') {
-      return "High School";
-    } else if (normalized == 'bachelor' || normalized == "bachelor's") {
-      return "Bachelor's";
-    } else if (normalized == 'master' || normalized == "master's") {
-      return "Master's";
-    } else if (normalized == 'phd') {
-      return "PhD";
-    }
-    return input;
-  }
-
-  String normalizeGender(String input) {
-    String normalized = input.trim().toLowerCase();
-    if (normalized == 'male') {
-      return 'Male';
-    } else if (normalized == 'female') {
-      return 'Female';
-    }
-    return input;
   }
 
   bool validateInputs() {
@@ -93,7 +69,7 @@ class _SalaryPredictionScreenState extends State<SalaryPredictionScreen> {
       return false;
     }
 
-    if (genderController.text.isEmpty) {
+    if (selectedGender == null) {
       setState(() {
         resultMessage = 'Error: Gender is required';
         isError = true;
@@ -101,7 +77,7 @@ class _SalaryPredictionScreenState extends State<SalaryPredictionScreen> {
       return false;
     }
 
-    if (educationLevelController.text.isEmpty) {
+    if (selectedEducation == null) {
       setState(() {
         resultMessage = 'Error: Education Level is required';
         isError = true;
@@ -159,27 +135,6 @@ class _SalaryPredictionScreenState extends State<SalaryPredictionScreen> {
       return false;
     }
 
-    String normalizedGender = normalizeGender(genderController.text);
-    if (!genderOptions.contains(normalizedGender)) {
-      setState(() {
-        resultMessage = 'Error: Gender must be Male or Female';
-        isError = true;
-      });
-      return false;
-    }
-
-    String normalizedEducation = normalizeEducationLevel(
-      educationLevelController.text,
-    );
-    if (!educationLevelOptions.contains(normalizedEducation)) {
-      setState(() {
-        resultMessage =
-            'Error: Education Level must be one of: High School, Bachelor\'s, Master\'s, PhD';
-        isError = true;
-      });
-      return false;
-    }
-
     if (jobTitleController.text.length < 1 ||
         jobTitleController.text.length > 100) {
       setState(() {
@@ -192,46 +147,279 @@ class _SalaryPredictionScreenState extends State<SalaryPredictionScreen> {
     return true;
   }
 
-  void makePrediction() async {
-    if (!validateInputs()) {
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-      resultMessage = 'Connecting to API...';
-      isError = false;
-    });
-
-    // TODO: Replace with actual API endpoint when deployed
-    // Example: String apiUrl = 'https://your-api.onrender.com/predict';
-
-    String normalizedGender = normalizeGender(genderController.text);
-    String normalizedEducation = normalizeEducationLevel(
-      educationLevelController.text,
-    );
+  Future<Map<String, dynamic>> _predictSalaryApiCall() async {
+    final apiUrl = 'https://salary-api-o99n.onrender.com/predict';
 
     Map<String, dynamic> predictionData = {
       'age': int.parse(ageController.text),
-      'gender': normalizedGender,
-      'education_level': normalizedEducation,
+      'gender': selectedGender,
+      'education_level': selectedEducation,
       'job_title': jobTitleController.text,
       'years_of_experience': double.parse(yearsOfExperienceController.text),
     };
 
-    // Simulate successful prediction for now
-    await Future.delayed(const Duration(seconds: 1));
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(predictionData),
+    );
 
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error: ${response.statusCode}\n${response.body}');
+    }
+  }
+
+  void makePrediction() {
+    if (!validateInputs()) {
+      return;
+    }
+
+    // Clear previous validation messages
     setState(() {
-      isLoading = false;
-      // Mock response - replace with actual API response
-      double mockPredictedSalary = 75000.50;
-      String modelUsed = 'RandomForest';
-
-      resultMessage =
-          'Predicted Salary: \$${mockPredictedSalary.toStringAsFixed(2)}\nModel: $modelUsed';
-      isError = false;
+      resultMessage = null;
     });
+
+    final predictionFuture = _predictSalaryApiCall();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return FutureBuilder<Map<String, dynamic>>(
+          future: predictionFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(color: Colors.deepPurple),
+                      SizedBox(height: 20),
+                      Text(
+                        "Predicting salary...",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.redAccent,
+                        size: 50,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Prediction Failed',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        snapshot.error.toString().replaceAll('Exception: ', ''),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text('Close'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              final data = snapshot.data!;
+              final predictedSalary = data['predicted_salary'];
+              final formattedSalary =
+                  "\$${(predictedSalary as num).toStringAsFixed(2)}";
+
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10.0,
+                        offset: Offset(0.0, 10.0),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.monetization_on,
+                          color: Colors.deepPurple,
+                          size: 40,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Estimated Salary',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        formattedSalary,
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black54,
+                              height: 1.5,
+                              fontFamily: 'Roboto', // Default flutter font
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: "Based on the profile of a ",
+                              ),
+                              TextSpan(
+                                text: "${ageController.text} year old ",
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "${selectedGender ?? 'N/A'} ",
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "${jobTitleController.text}",
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const TextSpan(text: " with "),
+                              TextSpan(
+                                text:
+                                    "${yearsOfExperienceController.text} years",
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const TextSpan(text: " of experience and a "),
+                              TextSpan(
+                                text: "${selectedEducation ?? 'N/A'}",
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const TextSpan(text: " degree."),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cool, Thanks!',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
   }
 
   void showRetrainingDialog() {
@@ -272,192 +460,256 @@ class _SalaryPredictionScreenState extends State<SalaryPredictionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text(
-          'Employee Salary Predictor',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
+          'Salary Prediction',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        elevation: 2,
+        elevation: 0,
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
-
-            // const SizedBox(height: 8),
-            const Text(
-              'Enter your information to predict salary',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-
-            // Age Input
-            TextField(
-              controller: ageController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Age',
-                hintText: 'e.g., 32',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.person),
-                helperText: 'Must be between 18 and 80',
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-            ),
-            const SizedBox(height: 16),
-
-            // Gender Input
-            TextField(
-              controller: genderController,
-              decoration: InputDecoration(
-                labelText: 'Gender',
-                hintText: 'e.g., Male or Female',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.wc),
-                helperText: 'Male or Female (case-insensitive)',
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Education Level Input
-            TextField(
-              controller: educationLevelController,
-              decoration: InputDecoration(
-                labelText: 'Education Level',
-                hintText: 'e.g., Bachelor\'s or Master\'s',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.school),
-                helperText: 'High School, Bachelor\'s, Master\'s, or PhD',
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Job Title Input
-            TextField(
-              controller: jobTitleController,
-              decoration: InputDecoration(
-                labelText: 'Job Title',
-                hintText: 'e.g., Data Analyst',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.work),
-                helperText: '1-100 characters',
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Years of Experience Input
-            TextField(
-              controller: yearsOfExperienceController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: 'Years of Experience',
-                hintText: 'e.g., 7',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.timeline),
-                helperText: 'Must be between 0 and 60',
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            // Predict Button
-            ElevatedButton(
-              onPressed: isLoading ? null : makePrediction,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.deepPurple,
-                disabledBackgroundColor: Colors.grey,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text(
-                      'Predict Salary',
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Enter Employee Details',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.deepPurple,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Age Input
+                    TextFormField(
+                      controller: ageController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Age',
+                        hintText: 'e.g., 32',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.person),
+                        filled: true,
+                        fillColor: Colors.grey[50],
                       ),
                     ),
+                    const SizedBox(height: 16),
+
+                    // Gender Dropdown
+                    DropdownButtonFormField<String>(
+                      value: selectedGender,
+                      decoration: InputDecoration(
+                        labelText: 'Gender',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.wc),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                      items: genderOptions.map((String gender) {
+                        return DropdownMenuItem<String>(
+                          value: gender,
+                          child: Text(gender),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedGender = newValue;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Education Level Dropdown
+                    DropdownButtonFormField<String>(
+                      value: selectedEducation,
+                      decoration: InputDecoration(
+                        labelText: 'Education Level',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.school),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                      items: educationLevelOptions.map((String education) {
+                        return DropdownMenuItem<String>(
+                          value: education,
+                          child: Text(education),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedEducation = newValue;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Job Title Input
+                    TextFormField(
+                      controller: jobTitleController,
+                      decoration: InputDecoration(
+                        labelText: 'Job Title',
+                        hintText: 'e.g., Data Analyst',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.work),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Years of Experience Input
+                    TextFormField(
+                      controller: yearsOfExperienceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'Years of Experience',
+                        hintText: 'e.g., 7',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.timeline),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Predict Button
+                    ElevatedButton(
+                      onPressed: isLoading ? null : makePrediction,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              'Predict Salary',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+
+                    if (resultMessage != null && isError) ...[
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red[50],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.red[200]!),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.red),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                resultMessage!,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 24),
 
-            // Result Display Area
-            if (resultMessage != null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isError ? Colors.red : Colors.green,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                  color: isError
-                      ? Colors.red.withOpacity(0.1)
-                      : Colors.green.withOpacity(0.1),
-                ),
-                child: Text(
-                  resultMessage!,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: isError ? Colors.red[700] : Colors.green[700],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            const SizedBox(height: 20),
-
-            // Retrain Model Button
-            OutlinedButton(
+            // Retrain Button
+            OutlinedButton.icon(
               onPressed: showRetrainingDialog,
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 side: const BorderSide(color: Colors.deepPurple, width: 2),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.upload_file, color: Colors.deepPurple),
-                  SizedBox(width: 8),
-                  Text(
-                    'Upload CSV to Retrain Model',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ],
+              icon: const Icon(Icons.upload_file, color: Colors.deepPurple),
+              label: const Text(
+                'Upload CSV to Retrain Model',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Batch Prediction Button
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BatchPredictionScreen(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.deepPurple,
+                elevation: 1,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.deepPurple.withOpacity(0.5)),
+                ),
+              ),
+              icon: const Icon(Icons.people_alt_outlined),
+              label: const Text(
+                'Batch Prediction',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
