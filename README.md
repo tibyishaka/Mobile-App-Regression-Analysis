@@ -11,6 +11,16 @@ Our solution offers a seamless mobile experience powered by a robust regression 
 
 [LINK TO YOUTUBE VIDEO DEMO](..)
 
+### App Screenshots
+
+| Prediction Input | Prediction Result |
+| :---: | :---: |
+| ![Prediction Screen](images/predict_screen.png) | ![Prediction Result](images/predict_result.png) |
+
+| Batch Input | Batch With Values | Batch Result |
+| :---: | :---: | :---: |
+| ![Batch Prediction Screen](images/batch_predict_screen.png) | ![Batch Screen with Values](images/batch_scren_with_values.png) | ![Batch Prediction Result](images/batch_prediction_result.png) |
+
 ## 🌐 Public API Endpoint
 
 The API is deployed and publicly accessible. You can test the endpoints directly via the Swagger UI:
@@ -179,7 +189,7 @@ To run the Flutter application that consumes the API:
 ## 📊 Dataset & Model Insights
 
 ### Dataset
-The model is trained on the **Salary Data** dataset (sourced from Kaggle), which contains information about employees' demographic and professional details.
+The model is trained on the **Salary Data** dataset (sourced from [Kaggle](https://www.kaggle.com/datasets/mohithsairamreddy/salary-data)), which contains information about employees' demographic and professional details.
 
 **Key Features:**
 *   **Age**: Employee age in years.
