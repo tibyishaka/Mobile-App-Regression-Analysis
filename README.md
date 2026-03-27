@@ -9,7 +9,7 @@ Our solution offers a seamless mobile experience powered by a robust regression 
 
 ## 📺 Demo Video
 
-[LINK TO YOUTUBE VIDEO DEMO](..)
+[LINK TO YOUTUBE VIDEO DEMO](https://youtu.be/utUwb38Y9rw)
 
 ### App Screenshots
 
